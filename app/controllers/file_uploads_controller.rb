@@ -7,7 +7,6 @@ class FileUploadsController < ApplicationController
   def show
     @file_upload = FileUpload.find(params[:id])
     redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
-    #send_data @file_upload.upload.download, filename: @file_upload.upload.filename.to_s, content_type: @file_upload.upload.content_type
   end
 
   def destroy
@@ -18,7 +17,7 @@ class FileUploadsController < ApplicationController
   def show_via_url
     @file_upload = FileUpload.find_by(url: params[:url])
     if @file_upload.present?
-      send_data @file_upload.upload.download, filename: @file_upload.upload.filename.to_s, content_type: @file_upload.upload.content_type
+      redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
     end
   end
   
@@ -44,7 +43,14 @@ class FileUploadsController < ApplicationController
   def upload_via_api
     api_key = ApiKey.active.find_by(value: params[:api_key])
     if api_key.present?
-      # try uploading file
+      @file_upload = FileUpload.new(file_upload_params)
+      @file_upload.user = api_key.user
+      @file_upload.generate_url
+      if @file_upload.save
+        render json: {status: 'ok', url: @file_upload.url}
+      else
+        render json: {status: 'error'}, status: 500
+      end
     else
       render json: {status: 'error'}, status: 403
     end
