@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
-  resource :file_uploads do
+  resources :file_uploads do
     member do
       get 'show_via_url'
+    end
+    collection do
+      post 'upload_via_api'
     end
   end
   get 'dashboard/index'

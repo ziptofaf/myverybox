@@ -1,2 +1,21 @@
 <h1>FileUploads#index</h1>
 <p>Find me in app/views/file_uploads/index.html.erb</p>
+<table>
+  <thead>
+  <tr>
+    <th>file url</th>
+    <th>uploaded at</th>
+    <th>actions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @file_uploads.each do |file_upload| %>
+    <tr>
+      <td><%= file_upload.url %></td>
+      <td><%= file_upload.created_at %></td>
+      <td><%= link_to "uploaded file", file_upload_path(file_upload)%></td>
+    </tr>
+  <% end %>
+  </tbody>
+  <%= link_to "add file", new_file_upload_path %>
+</table>
