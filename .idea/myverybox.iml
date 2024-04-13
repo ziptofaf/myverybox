@@ -48,9 +48,11 @@
     <orderEntry type="library" scope="PROVIDED" name="bundler (v2.5.3, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="capybara (v3.40.0, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="concurrent-ruby (v1.2.3, RVM: ruby-3.3.0) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="config (v5.4.0, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="connection_pool (v2.4.1, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="crass (v1.0.6, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="debug (v1.9.2, RVM: ruby-3.3.0) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="deep_merge (v1.2.2, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="devise (v4.9.4, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="diff-lcs (v1.5.1, RVM: ruby-3.3.0) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="drb (v2.2.1, RVM: ruby-3.3.0) [gem]" level="application" />
@@ -339,6 +341,7 @@
       <value>file://$MODULE_DIR$/public/stylesheets</value>
     </entry>
     <entry key="test/mailers/previews">
+      <value>file://$MODULE_DIR$/spec/mailers/previews</value>
       <value>file://$MODULE_DIR$/test/mailers/previews</value>
       <value>file://$MODULE_DIR$/test/mailers/previews</value>
     </entry>
