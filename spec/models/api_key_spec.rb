@@ -1,5 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe ApiKey, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe 'creation' do
+    let(:user) { create(:user) }
+
+    it 'adds value automatically' do
+      key = user.api_keys.create!
+      expect(key.value).to_not be nil
+    end
+  end
 end

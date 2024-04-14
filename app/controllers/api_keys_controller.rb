@@ -13,7 +13,7 @@ class ApiKeysController < ApplicationController
   
   def destroy
     key = ApiKey.find_by(user_id: current_user.id, id: params[:id])
-    if key.destroy
+    if key&.destroy
       redirect_to api_keys_path, notice: 'API key removed successfully'
     else
       redirect_to api_keys_path, notice: 'Could not destroy API key'

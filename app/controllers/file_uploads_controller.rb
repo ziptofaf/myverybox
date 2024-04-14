@@ -17,8 +17,12 @@ class FileUploadsController < ApplicationController
   end
 
   def show
-    @file_upload = FileUpload.find(user_id: current_user.id, id: params[:id])
-    redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
+    @file_upload = FileUpload.find_by(user_id: current_user.id, id: params[:id])
+    if @file_upload && @file_upload.active?
+      redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
+    else
+      render dashboard_not_found_path, status: 404
+    end
   end
 
   def destroy
@@ -28,8 +32,10 @@ class FileUploadsController < ApplicationController
 
   def show_via_url
     @file_upload = FileUpload.find_by(url: params[:url])
-    if @file_upload.present?
+    if @file_upload.present? && @file_upload.active?
       redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
+    else
+      render dashboard_not_found_path, status: 404
     end
   end
   
@@ -49,11 +55,11 @@ class FileUploadsController < ApplicationController
   end
   
   def file_upload_params
-    params.require(:file_upload).permit(:expires_after, :upload)
+    params.require(:file_upload).permit(:expires_after, :upload, :expires_in_seconds)
   end
   
   def api_file_upload_params
-    params.permit(:expires_after, :upload)
+    params.permit(:expires_after, :upload, :expires_in_seconds)
   end
   
   def upload_via_api
@@ -61,7 +67,6 @@ class FileUploadsController < ApplicationController
     if api_key.present?
       @file_upload = FileUpload.new(api_file_upload_params)
       @file_upload.user = api_key.user
-      @file_upload.generate_url
       if @file_upload.save
         render json: {status: 'ok', url: Settings.hostname + "/show/" + @file_upload.url}
       else
