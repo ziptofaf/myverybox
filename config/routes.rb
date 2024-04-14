@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       post 'upload_via_api'
     end
   end
+  resources :api_keys, only: [:index, :create, :destroy]
   
   get "show(/:url)" => "file_uploads#show_via_url"
   get 'dashboard/index'

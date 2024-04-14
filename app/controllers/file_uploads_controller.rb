@@ -17,12 +17,12 @@ class FileUploadsController < ApplicationController
   end
 
   def show
-    @file_upload = FileUpload.find(params[:id])
+    @file_upload = FileUpload.find(user_id: current_user.id, id: params[:id])
     redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
   end
 
   def destroy
-    FileUpload.find(params[:id]).destroy
+    FileUpload.find_by(user_id: current_user.id, id: params[:id]).destroy
     redirect_to file_uploads_path, notice: 'File has been deleted successfully'
   end
 

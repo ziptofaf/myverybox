@@ -1,0 +1,30 @@
+<h1>Browse your API keys</h1>
+
+<div class="ui grid">
+  <div class="twelve wide computer sixteen wide mobile column">
+    <p>
+      <%= button_to "Add new key", api_keys_path, method: :post, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button primary' %>
+    </p>
+    <table class="ui striped table">
+      <thead>
+      <tr>
+        <th>API key value</th>
+        <th>Creation date</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @api_keys.each do |api_key| %>
+        <tr>
+          <td><%= api_key.value %></td>
+          <td><%= api_key.created_at %></td>
+          <td>
+            <%= button_to "Remove", api_key, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+
+</div>

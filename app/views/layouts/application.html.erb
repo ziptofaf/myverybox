@@ -12,6 +12,16 @@
 
   <body>
     <div class="ui container">
+      <div class="ui fixed inverted menu">
+        <div class="ui container">
+          <a href="/" class="header item">
+            MyVeryBox
+          </a>
+          <%= link_to "File uploads", file_uploads_path, class: 'item' %>
+          <%= link_to "API keys", api_keys_path, class: 'item' %>
+        </div>
+      </div>
+      <br/>
       <%= yield %>
     </div>
   </body>

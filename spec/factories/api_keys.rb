@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :api_key do
-    user { nil }
+    user
     value { "MyString" }
-    active { false }
+    active { true }
   end
 end

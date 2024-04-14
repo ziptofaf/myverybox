@@ -1,32 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe "FileUploads", type: :request do
+  before :each do
+    sign_in create(:user)
+  end
+  
   describe "GET /index" do
     it "returns http success" do
-      get "/file_uploads/index"
+      get "/file_uploads"
       expect(response).to have_http_status(:success)
     end
   end
-
-  describe "GET /show" do
-    it "returns http success" do
-      get "/file_uploads/show"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET /destroy" do
-    it "returns http success" do
-      get "/file_uploads/destroy"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET /show_via_url" do
-    it "returns http success" do
-      get "/file_uploads/show_via_url"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
 end

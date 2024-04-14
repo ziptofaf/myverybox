@@ -1,4 +1,9 @@
-<%= form_for @file_upload do |f| %>
-  <%= f.file_field :upload %>
-  <%= f.submit %>
-<% end %>
+<h1>Upload a new file</h1>
+<div class="ui grid">
+  <div class="twelve wide computer sixteen wide mobile column">
+    <%= form_for @file_upload, html: {class: 'ui form'} do |f| %>
+      <%= f.file_field :upload, class: 'ui input' %>
+      <%= f.submit "Upload file", class: 'ui button primary' %>
+    <% end %>
+  </div>
+</div>

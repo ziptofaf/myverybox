@@ -7,7 +7,8 @@
     <h3>Easiest file sharing out there</h3>
     <p>
       Self hosted, with basic but functional interface and compatibility with 3rd party clients like ShareX.<br/>
-      <%= link_to "Manage your uploads", file_uploads_path %>
+      <%= link_to "Manage your uploads", file_uploads_path %><br/><br/>
+      <%= button_to "Sign out", destroy_user_session_path, :method => :delete, class: 'ui button primary' %>
     </p>
   </div>
 </div>
