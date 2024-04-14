@@ -15,13 +15,17 @@
     </thead>
     <tbody>
     <% @file_uploads.each do |file_upload| %>
-      <tr>
+      <tr class="<%= file_upload.active? ? '' : 'disabled' %>">
         <td><%= file_upload.upload.blob.filename %></td>
         <td><%= file_upload.created_at %></td>
         <td><%= image_tag file_upload.upload, class: 'ui mini image' %></td>
         <td>
-          <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %> 
-          <%= button_to "Remove", file_upload, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
+          <% if file_upload.active? %>
+            <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>
+            <%= button_to "Remove", file_upload, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
+          <% else %>
+            <p>File has expired.</p>
+          <% end %>
         </td>
       </tr>
     <% end %>
