@@ -1,24 +1,25 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Simple and straightforward file sharing application, compatible with 
+applications such as ShareX. 
 
-Things you may want to cover:
+## Configuration
 
-* Ruby version
+### Initial setup:
 
-* System dependencies
+1. Create a file settings.local.yml in configuration directory.
+2. Insert hostname: 'http://yourdomain.example.com'
+3. You can also place it in config/settings/{environment.rb} if you have multiple environments
 
-* Configuration
+###  Adding a new user:
 
-* Database creation
+    rails console
+    user = User.create(password: 'yourpassword', password_confirmation: 'yourpassword, email: 'youremail@example.com')
 
-* Database initialization
+### Configuring ShareX (or similar software)
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+1. Set a custom uploader
+2. POST {http://yourdomain.example.com}/file_uploads/upload_via_api
+3. Navigate to /api_keys on your instance of MyVeryBox, create a new one.
+4. Add a header in ShareX - name is api_key, value is your API key value
+5. Set url to {json:url} in response in ShareX, it will contain the path to newly uploaded file. 
