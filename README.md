@@ -10,11 +10,12 @@ applications such as ShareX.
 1. Create a file settings.local.yml in configuration directory.
 2. Insert hostname: 'http://yourdomain.example.com'
 3. You can also place it in config/settings/{environment.rb} if you have multiple environments
+4. run `rails db:migrate`
 
 ###  Adding a new user:
 
     rails console
-    user = User.create(password: 'yourpassword', password_confirmation: 'yourpassword, email: 'youremail@example.com')
+    user = User.create(password: 'yourpassword', password_confirmation: 'yourpassword', email: 'youremail@example.com')
 
 ### Configuring ShareX (or similar software)
 

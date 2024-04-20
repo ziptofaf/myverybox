@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_12_211629) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_20_005534) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -41,8 +41,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_12_211629) do
 
   create_table "api_keys", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.string "value"
-    t.boolean "active"
+    t.string "value", null: false
+    t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_api_keys_on_user_id"
@@ -51,7 +51,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_12_211629) do
   create_table "file_uploads", force: :cascade do |t|
     t.integer "user_id", null: false
     t.datetime "expires_after"
-    t.string "url"
+    t.string "url", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["url"], name: "index_file_uploads_on_url", unique: true
