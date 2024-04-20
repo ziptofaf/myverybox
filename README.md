@@ -7,8 +7,8 @@ applications such as ShareX.
 
 ### Initial setup:
 
-1. Create a file settings.local.yml in configuration directory.
-2. Insert hostname: 'http://yourdomain.example.com'
+1. Create a file settings.local.yml in configuration directory (you can use settings.local.yml.example as a base).
+2. Edit hostname so it matches your domain, eg. 'http://yourdomain.example.com'
 3. You can also place it in config/settings/{environment.rb} if you have multiple environments
 4. run `rails db:migrate`
 
