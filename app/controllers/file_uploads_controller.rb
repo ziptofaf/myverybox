@@ -19,7 +19,14 @@ class FileUploadsController < ApplicationController
   def show
     @file_upload = FileUpload.find_by(user_id: current_user.id, id: params[:id])
     if @file_upload && @file_upload.active?
-      redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
+      attachment = @file_upload.upload.attachment
+      send_file(
+        ActiveStorage::Blob.service.path_for(attachment.key),
+        filename: attachment.blob.filename.to_s,
+        type: attachment.blob.content_type,
+        status: :ok,
+        disposition: 'inline'
+      )
     else
       render dashboard_not_found_path, status: 404
     end
@@ -33,7 +40,15 @@ class FileUploadsController < ApplicationController
   def show_via_url
     @file_upload = FileUpload.find_by(url: params[:url])
     if @file_upload.present? && @file_upload.active?
-      redirect_to rails_blob_path(@file_upload.upload, disposition: "inline")
+      attachment = @file_upload.upload.attachment
+
+      send_file(
+        ActiveStorage::Blob.service.path_for(attachment.key),
+        filename: attachment.blob.filename.to_s,
+        type: attachment.blob.content_type,
+        status: :ok,
+        disposition: 'inline'
+      )
     else
       render dashboard_not_found_path, status: 404
     end
