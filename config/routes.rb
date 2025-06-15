@@ -11,6 +11,8 @@ Rails.application.routes.draw do
   get 'dashboard/index'
   get 'dashboard/not_found'
   get 'system_settings/index'
+  put 'system_settings/update_settings'
+  delete 'system_settings/clean_up_expired_file_uploads'
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

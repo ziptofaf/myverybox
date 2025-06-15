@@ -60,28 +60,33 @@ class FileUploadsController < ApplicationController
   
   def create
     @file_upload = FileUpload.new(file_upload_params)
+    if file_upload_params[:expires_in_seconds].blank? && file_upload_params[:expires_after].blank?
+      setting = Setting.find_by(name: 'expires_in_seconds')
+      if setting
+        @file_upload.expires_in_seconds = setting.formatted_value
+      end
+    end
     @file_upload.user = current_user
     @file_upload.generate_url
     if @file_upload.save
-      redirect_to file_upload_path(@file_upload), notice: 'File uploaded successfully'
+      redirect_to file_uploads_path, notice: 'File uploaded successfully'
     else
       render :new, error: 'Error uploading file'
     end
   end
-  
-  def file_upload_params
-    params.require(:file_upload).permit(:expires_after, :upload, :expires_in_seconds)
-  end
-  
-  def api_file_upload_params
-    params.permit(:expires_after, :upload, :expires_in_seconds)
-  end
-  
+
+
   def upload_via_api
     api_key = ApiKey.active.find_by(value: request.headers["HTTP_API_KEY"])
     if api_key.present?
       @file_upload = FileUpload.new(api_file_upload_params)
       @file_upload.user = api_key.user
+      if api_file_upload_params[:expires_in_seconds].blank? && api_file_upload_params[:expires_after].blank?
+        setting = Setting.find_by(name: 'expires_in_seconds')
+        if setting
+          @file_upload.expires_in_seconds = setting.formatted_value
+        end
+      end
       if @file_upload.save
         render json: {status: 'ok', url: Settings.hostname + "/show/" + @file_upload.url}
       else
@@ -90,5 +95,15 @@ class FileUploadsController < ApplicationController
     else
       render json: {status: 'error'}, status: 403
     end
+  end
+  
+  private
+  
+  def file_upload_params
+    params.require(:file_upload).permit(:expires_after, :upload, :expires_in_seconds)
+  end
+  
+  def api_file_upload_params
+    params.permit(:expires_after, :upload, :expires_in_seconds)
   end
 end

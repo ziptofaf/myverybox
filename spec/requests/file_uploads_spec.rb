@@ -17,7 +17,7 @@ RSpec.describe "FileUploads", type: :request do
     it 'shows a file if it belongs to user' do
       upload = create(:file_upload, user:)
       get "/file_uploads/#{upload.id}"
-      expect(response).to have_http_status(302)
+      expect(response).to have_http_status(:success)
     end
 
     it 'does not show a file belonging to a different user' do

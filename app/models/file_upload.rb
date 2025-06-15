@@ -8,6 +8,7 @@ class FileUpload < ApplicationRecord
   end
   
   def expires_in_seconds=(value)
+    return if value == 0
     self.expires_after = value.to_i.seconds.from_now
   end
   

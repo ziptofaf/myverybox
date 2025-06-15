@@ -1,5 +1,17 @@
 <h1>Browse your uploads</h1>
 
+<% if flash[:notice] %>
+  <div class="sixteen wide computer column">
+    <p><%= flash[:notice] %></p>
+  </div>
+<% end %>
+<% if flash[:error] %>
+  <div class="sixteen wide computer column">
+    <p><%= flash[:error] %></p>
+  </div>
+<% end %>
+
+
 <div class="ui grid">
   <div class="twelve wide computer sixteen wide mobile column">
     <p><%= link_to "Upload a new file", new_file_upload_path, class: 'ui button primary' %></p>
