@@ -1,0 +1,28 @@
+<h1>System settings</h1>
+
+<div class="ui grid">
+  <div class="sixteen wide computer column">
+    <% settings = SystemSettings.new.space_available[1..-1] %>
+    <table class="ui striped table">
+      <thead>
+      <tr>
+        <th>Filesystem</th>
+        <th>Size</th>
+        <th>Used</th>
+        <th>Available</th>
+        <th>Capacity</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% settings.each do |setting_row| %>
+        <% individuals = setting_row.split(/\s+/) %>
+        <tr>
+        <% individuals[0..4].each do |ind| %>
+          <td><%= ind %></td>
+        <% end %>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

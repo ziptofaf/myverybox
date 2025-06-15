@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get "show(/:url)" => "file_uploads#show_via_url"
   get 'dashboard/index'
   get 'dashboard/not_found'
+  get 'system_settings/index'
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -1,45 +1,45 @@
 <h1>Browse your uploads</h1>
 
 <div class="ui grid">
-<div class="twelve wide computer sixteen wide mobile column">
-  <p><%= link_to "Upload a new file", new_file_upload_path, class: 'ui button primary' %></p>
-  <p>Looking for API keys? <%= link_to "Check here.", api_keys_path %></p>
-  <table class="ui striped table">
-    <thead>
-    <tr>
-      <th>Filename</th>
-      <th>Uploaded at</th>
-      <th>Miniature</th>
-      <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% @file_uploads.each do |file_upload| %>
-      <tr class="<%= file_upload.active? ? '' : 'disabled' %>">
-        <td><%= file_upload.upload.blob.filename %></td>
-        <td><%= file_upload.created_at %></td>
-        <td><%= image_tag file_upload.upload, class: 'ui mini image' %></td>
-        <td>
-          <% if file_upload.active? %>
-            <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>
-            <%= button_to "Remove", file_upload, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
-          <% else %>
-            <p>File has expired.</p>
-          <% end %>
-        </td>
+  <div class="twelve wide computer sixteen wide mobile column">
+    <p><%= link_to "Upload a new file", new_file_upload_path, class: 'ui button primary' %></p>
+    <p>Looking for API keys? <%= link_to "Check here.", api_keys_path %></p>
+    <table class="ui striped table">
+      <thead>
+      <tr>
+        <th>Filename</th>
+        <th>Uploaded at</th>
+        <th>Miniature</th>
+        <th>Actions</th>
       </tr>
-    <% end %>
-    </tbody>
-  </table>
-  <div class="eight wide computer sixteen wide mobile column">
-    <% if @page > 1 %>
-      <%= link_to "<-", file_uploads_path(page: @page - 1), class: 'ui primary button'  %>
-    <% end %>
-    <% if @file_uploads.count == @per_page %>
-      <% p(@page) %>
-      <%= link_to "->", file_uploads_path(page: @page + 1), class: 'ui primary button' %>
-    <% end %>
+      </thead>
+      <tbody>
+      <% @file_uploads.each do |file_upload| %>
+        <tr class="<%= file_upload.active? ? '' : 'disabled' %>">
+          <td><%= file_upload.upload.blob.filename %></td>
+          <td><%= file_upload.created_at %></td>
+          <td><%= image_tag file_upload.upload, class: 'ui mini image' %></td>
+          <td>
+            <% if file_upload.active? %>
+              <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>
+              <%= button_to "Remove", file_upload, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
+            <% else %>
+              <p>File has expired.</p>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div class="eight wide computer sixteen wide mobile column">
+      <% if @page > 1 %>
+        <%= link_to "<-", file_uploads_path(page: @page - 1), class: 'ui primary button'  %>
+      <% end %>
+      <% if @file_uploads.count == @per_page %>
+        <% p(@page) %>
+        <%= link_to "->", file_uploads_path(page: @page + 1), class: 'ui primary button' %>
+      <% end %>
+    </div>
   </div>
-</div>
   
 </div>
