@@ -18,10 +18,21 @@ class FileUploadsController < ApplicationController
   end
   
   def search
-    
   end
   
   def search_results
+    @page = params[:page].to_i || 1
+    @per_page = 10
+
+    if @page == 0
+      @page = 1
+    end
+    if @page == 1
+      offset = 0
+    else
+      offset = (@page - 1) * @per_page
+    end
+    
     @file_uploads = FileUpload.joins(upload_attachment: :blob).includes(upload_attachment: :blob).order('file_uploads.id desc').where(user_id: current_user.id)
     if search_params[:created_at_from].present?
       @file_uploads = @file_uploads.where('created_at >= ?', search_params[:created_at_from])
@@ -35,8 +46,7 @@ class FileUploadsController < ApplicationController
       @file_uploads = @file_uploads.where('filename LIKE ?', "%#{search_params[:filename]}%")
     end
     
-    @page = 1
-    @per_page = 99_999
+      @file_uploads = @file_uploads.limit(@per_page).offset(offset)
     
     render "index"
   end
