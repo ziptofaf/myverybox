@@ -22,7 +22,7 @@
       <tr>
         <th>Filename</th>
         <th>Uploaded at</th>
-        <th>Miniature</th>
+        <th>Preview</th>
         <th>File size</th>
         <th>Expiration date</th>
         <th>Actions</th>
@@ -33,7 +33,7 @@
         <tr class="<%= file_upload.active? ? '' : 'disabled' %>">
           <td><%= file_upload.upload.blob.filename %></td>
           <td><%= file_upload.created_at %></td>
-          <td><%= image_tag file_upload.upload, class: 'ui mini image' %></td>
+          <td><%= miniature_for(file_upload) %></td>
           <td><%= file_upload.megabyte_size %>MB</td>
           <% if file_upload.expires_after %> 
           <td><%= file_upload.expires_after %></td>
