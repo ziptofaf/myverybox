@@ -15,6 +15,30 @@ class FileUploadsController < ApplicationController
     
     @file_uploads = FileUpload.includes(upload_attachment: :blob).order('id desc').where(user_id: current_user.id).limit(@per_page).offset(offset)
   end
+  
+  def search
+    
+  end
+  
+  def search_results
+    @file_uploads = FileUpload.includes(upload_attachment: :blob).order('id desc').where(user_id: current_user.id)
+    if search_params[:created_at_from].present?
+      @file_uploads = @file_uploads.where('created_at >= ?', search_params[:created_at_from])
+    end
+
+    if search_params[:created_at_to].present?
+      @file_uploads = @file_uploads.where('created_at <= ?', search_params[:created_at_to])
+    end
+    
+    if search_params[:filename]
+      @file_uploads = @file_uploads.select {|upload| upload.upload.blob.filename.to_s.downcase.include?(search_params[:filename].downcase)}
+    end
+    
+    @page = 1
+    @per_page = 99_999
+    
+    render "index"
+  end
 
   def show
     @file_upload = FileUpload.find_by(user_id: current_user.id, id: params[:id])
@@ -98,6 +122,10 @@ class FileUploadsController < ApplicationController
   end
   
   private
+  
+  def search_params
+    params.require(:search).permit(:created_at_from, :created_at_to, :filename)
+  end
   
   def file_upload_params
     params.require(:file_upload).permit(:expires_after, :upload, :expires_in_seconds)

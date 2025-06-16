@@ -3,6 +3,8 @@ Rails.application.routes.draw do
     collection do
       get 'show_via_url'
       post 'upload_via_api'
+      get 'search'
+      get 'search_results'
     end
   end
   resources :api_keys, only: [:index, :create, :destroy]

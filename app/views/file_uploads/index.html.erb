@@ -15,6 +15,7 @@
 <div class="ui grid">
   <div class="twelve wide computer sixteen wide mobile column">
     <p><%= link_to "Upload a new file", new_file_upload_path, class: 'ui button primary' %></p>
+    <p><%= link_to "Search for file", search_file_uploads_path %></p>
     <p>Looking for API keys? <%= link_to "Check here.", api_keys_path %></p>
     <table class="ui striped table">
       <thead>
@@ -22,6 +23,8 @@
         <th>Filename</th>
         <th>Uploaded at</th>
         <th>Miniature</th>
+        <th>File size</th>
+        <th>Expiration date</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -31,6 +34,12 @@
           <td><%= file_upload.upload.blob.filename %></td>
           <td><%= file_upload.created_at %></td>
           <td><%= image_tag file_upload.upload, class: 'ui mini image' %></td>
+          <td><%= file_upload.megabyte_size %>MB</td>
+          <% if file_upload.expires_after %> 
+          <td><%= file_upload.expires_after %></td>
+            <% else %>
+          <td>never</td>
+          <% end %>
           <td>
             <% if file_upload.active? %>
               <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>

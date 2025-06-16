@@ -1,0 +1,22 @@
+<h1>Search for file</h1>
+
+
+<div class="twelve wide computer sixteen wide mobile column">
+      <%= form_for :search, url: search_results_file_uploads_path, method: :get, html: {class: 'ui form'} do |f| %>
+        <div class="field">
+          <%= f.label :created_at_from, 'Uploaded after' %>
+          <%= f.date_field :created_at_from %>
+        </div>
+        <div class="field">
+          <%= f.label :created_at_to, 'Uploaded before' %>
+          <%= f.date_field :created_at_to %>
+        </div>
+        <div class="field">
+          <%= f.label :filename, 'Name of the field (can be just part of it)' %>
+          <%= f.text_field :filename %>
+        </div>
+        <div class="field">
+          <%= f.submit "Search", class: 'ui button primary' %>
+        </div>
+      <% end %>
+</div>

@@ -19,4 +19,8 @@ class FileUpload < ApplicationRecord
   def active?
     !expired?
   end
+  
+  def megabyte_size
+    (upload.blob.byte_size / 1024.0 / 1024.0).round(2)
+  end
 end
