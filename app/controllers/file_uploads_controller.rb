@@ -21,7 +21,7 @@ class FileUploadsController < ApplicationController
   end
   
   def search_results
-    @file_uploads = FileUpload.includes(upload_attachment: :blob).order('id desc').where(user_id: current_user.id)
+    @file_uploads = FileUpload.joins(upload_attachment: :blob).includes(upload_attachment: :blob).order('file_uploads.id desc').where(user_id: current_user.id)
     if search_params[:created_at_from].present?
       @file_uploads = @file_uploads.where('created_at >= ?', search_params[:created_at_from])
     end
@@ -31,7 +31,7 @@ class FileUploadsController < ApplicationController
     end
     
     if search_params[:filename]
-      @file_uploads = @file_uploads.select {|upload| upload.upload.blob.filename.to_s.downcase.include?(search_params[:filename].downcase)}
+      @file_uploads = @file_uploads.where('filename LIKE ?', "%#{search_params[:filename]}%")
     end
     
     @page = 1
