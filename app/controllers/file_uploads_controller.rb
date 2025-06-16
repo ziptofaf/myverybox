@@ -1,6 +1,7 @@
 class FileUploadsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show_via_url, :upload_via_api]
   skip_before_action :verify_authenticity_token, only: [:upload_via_api]
+  include ActiveStorage::SetCurrent
   def index
     @per_page = 10
     @page = params[:page].to_i || 1
