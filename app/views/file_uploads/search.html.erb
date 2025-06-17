@@ -12,9 +12,13 @@
           <%= f.date_field :created_at_to %>
         </div>
         <div class="field">
-          <%= f.label :filename, 'Name of the field (can be just part of it)' %>
+          <%= f.label :filename, 'Name of the file (can be just part of it)' %>
           <%= f.text_field :filename %>
         </div>
+    <div class="field">
+      <%= f.label :description, 'File description (can be just part of it)' %>
+      <%= f.text_field :description %>
+    </div>
         <div class="field">
           <%= f.submit "Search", class: 'ui button primary' %>
         </div>

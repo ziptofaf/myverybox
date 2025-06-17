@@ -42,8 +42,12 @@ class FileUploadsController < ApplicationController
       @file_uploads = @file_uploads.where('created_at <= ?', search_params[:created_at_to])
     end
     
-    if search_params[:filename]
+    if search_params[:filename].present?
       @file_uploads = @file_uploads.where('filename LIKE ?', "%#{search_params[:filename]}%")
+    end
+    
+    if search_params[:description].present?
+      @file_uploads = @file_uploads.where('description LIKE ?', "%#{search_params[:description]}%")
     end
     
       @file_uploads = @file_uploads.limit(@per_page).offset(offset)
@@ -135,7 +139,7 @@ class FileUploadsController < ApplicationController
   private
   
   def search_params
-    params.require(:search).permit(:created_at_from, :created_at_to, :filename)
+    params.require(:search).permit(:created_at_from, :created_at_to, :filename, :description)
   end
   
   def file_upload_params

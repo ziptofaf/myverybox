@@ -33,7 +33,7 @@
 
   
   <div class="twelve wide computer sixteen wide mobile column">
-    <% if @expires_in_seconds && @remove_expired_files %>
+    <% if @expires_in_seconds && @remove_expired_files && @image_description_analysis %>
       <%= form_for :system_settings, url: system_settings_update_settings_path, method: :put, html: {class: 'ui form'} do |f| %>
         <div class="field">
           <%= f.label :expires_in_seconds, 'By default files expire in (seconds, set 0 for unlimited):' %>
@@ -43,6 +43,10 @@
          <%= f.label :remove_expired_files, 'Should expired files be automatically removed (daily task, NOT YET implemented)' %>
          <%= f.check_box :remove_expired_files, checked: @remove_expired_files.formatted_value %>
        </div>
+        <div class="field">
+          <%= f.label :image_description_analysis, 'Should image files be sent to description analysis after upload (requires separate application!)' %>
+          <%= f.check_box :image_description_analysis, checked: @image_description_analysis.formatted_value %>
+        </div>
         <div class="field">
           <%= f.submit "Update settings", class: 'ui button primary' %>
         </div>

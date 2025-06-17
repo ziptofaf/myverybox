@@ -2,6 +2,7 @@ class FileUpload < ApplicationRecord
   belongs_to :user
   has_one_attached :upload
   before_create :generate_url
+  after_create_commit :fill_description
   
   def generate_url
     self.url ||= SecureRandom.urlsafe_base64(32)
@@ -22,5 +23,9 @@ class FileUpload < ApplicationRecord
   
   def megabyte_size
     (upload.blob.byte_size / 1024.0 / 1024.0).round(2)
+  end
+  
+  def fill_description
+    ImageAnalysisService.new(self).call
   end
 end

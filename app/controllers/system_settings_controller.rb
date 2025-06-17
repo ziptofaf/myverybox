@@ -3,18 +3,24 @@ class SystemSettingsController < ApplicationController
     @space_available = SystemSettings.new.space_available
     @expires_in_seconds = Setting.find_by(name: 'expires_in_seconds')
     @remove_expired_files = Setting.find_by(name: 'remove_expired_files')
+    @image_description_analysis = Setting.find_by(name: 'image_description_analysis')
   end
   
   def update_settings
     @expires_in_seconds = Setting.find_by(name: 'expires_in_seconds')
     @remove_expired_files = Setting.find_by(name: 'remove_expired_files')
-    
+    @image_description_analysis = Setting.find_by(name: 'image_description_analysis')
+
     if permitted_params[:expires_in_seconds].present?
       @expires_in_seconds.update(value: permitted_params[:expires_in_seconds])
     end
     
     if permitted_params[:remove_expired_files].present?
       @remove_expired_files.update(value: permitted_params[:remove_expired_files])
+    end
+
+    if permitted_params[:image_description_analysis].present?
+      @image_description_analysis.update(value: permitted_params[:image_description_analysis])
     end
     
     redirect_to system_settings_index_path, notice: 'Settings have been updated'
@@ -27,6 +33,6 @@ class SystemSettingsController < ApplicationController
   end
   
   def permitted_params
-    params.require(:system_settings).permit(:expires_in_seconds, :remove_expired_files)
+    params.require(:system_settings).permit(:expires_in_seconds, :remove_expired_files, :image_description_analysis)
   end
 end
