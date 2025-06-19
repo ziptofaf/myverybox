@@ -4,7 +4,7 @@ class ImageAnalysisService
   end
   
   def call
-    return unless enabled? 
+    return unless enabled?
 
     path = Settings.hostname + "/show/" + @file_upload.url
     res = HTTParty.get(Settings.image_analysis_hostname + "/?file_path=#{path}", timeout: 5)

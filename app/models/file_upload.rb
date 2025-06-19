@@ -26,6 +26,6 @@ class FileUpload < ApplicationRecord
   end
   
   def fill_description
-    ImageAnalysisService.new(self).call
+    DescriptionFillingJob.perform_later(id)
   end
 end
