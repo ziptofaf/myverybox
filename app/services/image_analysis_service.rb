@@ -7,9 +7,9 @@ class ImageAnalysisService
     return unless enabled?
 
     path = Settings.hostname + "/show/" + @file_upload.url
-    res = HTTParty.get(Settings.image_analysis_hostname + "/?file_path=#{path}", timeout: 5)
+    res = HTTParty.get(Settings.image_analysis_hostname + "/?file_path=#{path}", timeout: 8)
     if res.code == 200
-      @file_upload.update(description: res.body)
+      @file_upload.update(description: res.body.encode("UTF-8", invalid: :replace, undef: :replace, replace: '?'))
     end
   rescue Net::OpenTimeout, Errno::ECONNREFUSED # it's fine if it fails here, descriptions are optional
     # Ignored
