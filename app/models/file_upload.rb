@@ -26,7 +26,7 @@ class FileUpload < ApplicationRecord
   end
   
   def fill_metadata
-    DescriptionFillingJob.perform_later(id)
-    FileUploadCaptionJob.perform_later(id)
+    DescriptionFillingJob.set(wait: 1.second).perform_later(id)
+    FileUploadCaptionJob.set(wait: 10.seconds).perform_later(id)
   end
 end
