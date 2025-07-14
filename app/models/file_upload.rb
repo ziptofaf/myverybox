@@ -3,6 +3,7 @@ class FileUpload < ApplicationRecord
   has_one_attached :upload
   before_create :generate_url
   after_create_commit :fill_description
+  after_create_commit :fill_caption
   
   def generate_url
     self.url ||= SecureRandom.urlsafe_base64(32)
@@ -27,5 +28,9 @@ class FileUpload < ApplicationRecord
   
   def fill_description
     DescriptionFillingJob.perform_later(id)
+  end
+  
+  def fill_caption
+    FileUploadCaptionJob.perform_later(id)
   end
 end

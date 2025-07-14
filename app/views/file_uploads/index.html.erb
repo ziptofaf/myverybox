@@ -26,6 +26,7 @@
         <th>File size</th>
         <th>Expiration date</th>
         <th>Description</th>
+        <th>Text</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -42,6 +43,7 @@
           <td>never</td>
           <% end %>
           <td><%= file_upload.description.to_s.first(400) %>...</td>
+          <td><%= file_upload.caption %></td>
           <td>
             <% if file_upload.active? %>
               <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>
