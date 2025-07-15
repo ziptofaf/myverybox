@@ -42,8 +42,8 @@
             <% else %>
           <td>never</td>
           <% end %>
-          <td><div class="truncated-text"><%= file_upload.description.to_s %></div></td>
-          <td><div class="truncated-text"><%= file_upload.caption %></div></td>
+          <td class="truncated-text"><div><%= file_upload.description.to_s %></div></td>
+          <td class="truncated-text"><div><%= file_upload.caption %></div></td>
           <td>
             <% if file_upload.active? %>
               <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>
