@@ -24,7 +24,7 @@
             <%= f.text_field :description, placeholder: "e.g. ShareX on my laptop", maxlength: 255, required: true %>
           </div>
           <div class="field">
-            <%= f.label :expires_in, "Valid for" %>
+            <%= f.label :expires_in, "Expires in" %>
             <%= f.select :expires_in,
                          ApiKey::EXPIRATION_OPTIONS.map { |value, (label, _)| [label, value] },
                          selected: params.dig(:api_key, :expires_in) || ApiKey::DEFAULT_EXPIRATION %>
