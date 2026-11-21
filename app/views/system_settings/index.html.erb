@@ -7,26 +7,40 @@
     </div>
   <% end %>
   <div class="sixteen wide computer column">
-    <% settings = SystemSettings.new.space_available[1..-1] %>
-    <table class="ui striped table">
-      <thead>
-      <tr>
-        <th>Filesystem</th>
-        <th>Size</th>
-        <th>Used</th>
-        <th>Available</th>
-        <th>Capacity</th>
-      </tr>
-      </thead>
+    <h3 class="ui header">Storage</h3>
+    <table class="ui definition table">
       <tbody>
-      <% settings.each do |setting_row| %>
-        <% individuals = setting_row.split(/\s+/) %>
         <tr>
-        <% individuals[0..4].each do |ind| %>
-          <td><%= ind %></td>
-        <% end %>
+          <td class="four wide">Database</td>
+          <td><%= number_to_human_size(@database_bytes) %></td>
         </tr>
-      <% end %>
+        <tr>
+          <td>Uploaded files</td>
+          <td>
+            <%= number_to_human_size(@uploads.bytes) %> in <%= number_with_delimiter(@uploads.count) %> files
+            <% if @uploads.expired_count.positive? %>
+              <span class="ui grey text">(<%= number_to_human_size(@uploads.expired_bytes) %> of it in <%= number_with_delimiter(@uploads.expired_count) %> expired files)</span>
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <td>Thumbnails and previews</td>
+          <td><%= number_to_human_size(@uploads.generated_bytes) %></td>
+        </tr>
+        <tr>
+          <td>Disk holding uploaded files</td>
+          <td>
+            <% if @disk %>
+              <strong><%= number_to_human_size(@disk.available_bytes) %> free</strong>
+              of <%= number_to_human_size(@disk.total_bytes) %> (<%= @disk.used_percent %>% used)
+              <div class="ui small progress <%= @disk.used_percent >= 90 ? 'error' : (@disk.used_percent >= 75 ? 'warning' : 'success') %>" style="margin: 0.5em 0 0">
+                <div class="bar" style="width: <%= @disk.used_percent.clamp(0, 100) %>%; min-width: 0"></div>
+              </div>
+            <% else %>
+              <span class="ui grey text">not available (files are not stored on a local disk)</span>
+            <% end %>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

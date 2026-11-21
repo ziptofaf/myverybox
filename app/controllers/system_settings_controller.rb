@@ -1,6 +1,9 @@
 class SystemSettingsController < ApplicationController
   def index
-    @space_available = SystemSettings.new.space_available
+    stats = StorageStats.new
+    @database_bytes = stats.database_bytes
+    @uploads = stats.uploads
+    @disk = stats.disk
     @expires_in_seconds = Setting.find_by(name: 'expires_in_seconds')
     @remove_expired_files = Setting.find_by(name: 'remove_expired_files')
     @image_description_analysis = Setting.find_by(name: 'image_description_analysis')
