@@ -1,30 +1,73 @@
-<h1>Browse your API keys</h1>
+<h1>API keys</h1>
+
+<% if flash[:notice] %>
+  <div class="ui positive message"><p><%= flash[:notice] %></p></div>
+<% end %>
 
 <div class="ui grid">
   <div class="twelve wide computer sixteen wide mobile column">
-    <p>
-      <%= button_to "Add new key", api_keys_path, method: :post, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button primary' %>
-    </p>
+    <div class="ui segment">
+      <h3 class="ui header">Create a new API key</h3>
+      <%= form_with model: @api_key, url: api_keys_path, html: { class: "ui form#{' error' if @api_key.errors.any?}" }, data: { turbo: false } do |f| %>
+        <% if @api_key.errors.any? %>
+          <div class="ui error message">
+            <ul class="list">
+              <% @api_key.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        <div class="two fields">
+          <div class="field required<%= ' error' if @api_key.errors[:description].any? %>">
+            <%= f.label :description, "What is it for?" %>
+            <%= f.text_field :description, placeholder: "e.g. ShareX on my laptop", maxlength: 255, required: true %>
+          </div>
+          <div class="field">
+            <%= f.label :expires_in, "Valid for" %>
+            <%= f.select :expires_in,
+                         ApiKey::EXPIRATION_OPTIONS.map { |value, (label, _)| [label, value] },
+                         selected: params.dig(:api_key, :expires_in) || ApiKey::DEFAULT_EXPIRATION %>
+          </div>
+        </div>
+        <%= f.submit "Create API key", class: "ui primary button" %>
+      <% end %>
+    </div>
+
     <table class="ui striped table">
       <thead>
       <tr>
-        <th>API key value</th>
-        <th>Creation date</th>
+        <th>Description</th>
+        <th>Created</th>
+        <th>Expires</th>
+        <th>Last used</th>
         <th>Actions</th>
       </tr>
       </thead>
       <tbody>
+      <% if @api_keys.empty? %>
+        <tr><td colspan="5">You have no API keys yet.</td></tr>
+      <% end %>
       <% @api_keys.each do |api_key| %>
-        <tr>
-          <td><%= api_key.value %></td>
-          <td><%= api_key.created_at %></td>
+        <tr class="<%= 'negative' if api_key.expired? %>">
+          <td><%= api_key.description.presence || content_tag(:em, "(no description)") %></td>
+          <td><%= api_key.created_at.to_date %></td>
           <td>
-            <%= button_to "Remove", api_key, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
+            <% if api_key.expires_at.nil? %>
+              never
+            <% elsif api_key.expired? %>
+              expired on <%= api_key.expires_at.to_date %>
+            <% else %>
+              <%= api_key.expires_at.to_date %>
+            <% end %>
+          </td>
+          <td><%= api_key.last_used_at ? "#{time_ago_in_words(api_key.last_used_at)} ago" : "never" %></td>
+          <td>
+            <%= button_to "Remove", api_key, method: :delete, form: { class: 'inline-form', data: { turbo_confirm: 'Remove this API key? Anything using it will stop working.' } }, class: 'ui inline button red' %>
           </td>
         </tr>
       <% end %>
       </tbody>
     </table>
   </div>
-
 </div>

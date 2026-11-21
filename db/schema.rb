@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_14_231341) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_170000) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "active_storage_attachments", id: :serial, force: :cascade do |t|
     t.string "name", null: false
@@ -44,11 +44,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_14_231341) do
 
   create_table "api_keys", id: :serial, force: :cascade do |t|
     t.integer "user_id", null: false
-    t.string "value", null: false
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "value_digest", null: false
+    t.string "description"
+    t.datetime "expires_at"
+    t.datetime "last_used_at"
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+    t.index ["value_digest"], name: "index_api_keys_on_value_digest", unique: true
   end
 
   create_table "file_uploads", id: :serial, force: :cascade do |t|

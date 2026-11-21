@@ -31,6 +31,7 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
+  config.include ActiveSupport::Testing::TimeHelpers
 
   # Run every example inside a transaction that is rolled back afterwards, so
   # records created by one example never leak into the next one.

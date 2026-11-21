@@ -1,0 +1,32 @@
+<h1>Your new API key</h1>
+
+<div class="ui grid">
+  <div class="twelve wide computer sixteen wide mobile column">
+    <div class="ui warning message">
+      <div class="header">Copy it now - it will not be shown again.</div>
+      <p>Only a fingerprint of the key is stored, so it cannot be recovered later. If you lose it, remove it and create a new one.</p>
+    </div>
+
+    <div class="ui segment" data-controller="clipboard">
+      <div class="ui fluid action input">
+        <input type="text" readonly value="<%= @api_key.token %>" data-clipboard-target="source"
+               aria-label="API key" autocomplete="off" spellcheck="false" data-action="focus->clipboard#select click->clipboard#select">
+        <button type="button" class="ui primary button" data-clipboard-target="button" data-action="clipboard#copy">
+          Copy
+        </button>
+      </div>
+
+      <table class="ui very basic table">
+        <tbody>
+          <tr><td>Description</td><td><%= @api_key.description %></td></tr>
+          <tr><td>Expires</td><td><%= @api_key.expires_at ? @api_key.expires_at.to_date : "never" %></td></tr>
+        </tbody>
+      </table>
+
+      <p>In ShareX (or similar), send it in a header named <code>api_key</code> to
+        <code><%= Settings.hostname %>/file_uploads/upload_via_api</code>.</p>
+    </div>
+
+    <%= link_to "Done - back to API keys", api_keys_path, class: "ui button" %>
+  </div>
+</div>

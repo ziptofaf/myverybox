@@ -116,8 +116,9 @@ class FileUploadsController < ApplicationController
 
 
   def upload_via_api
-    api_key = ApiKey.active.find_by(value: request.headers["HTTP_API_KEY"])
+    api_key = ApiKey.authenticate(request.headers["HTTP_API_KEY"])
     if api_key.present?
+      api_key.touch_last_used!
       @file_upload = FileUpload.new(api_file_upload_params)
       @file_upload.user = api_key.user
       if api_file_upload_params[:expires_in_seconds].blank? && api_file_upload_params[:expires_after].blank?

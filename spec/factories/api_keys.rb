@@ -1,7 +1,8 @@
 FactoryBot.define do
   factory :api_key do
     user
-    value { "MyString" }
+    description { "ShareX" }
     active { true }
+    expires_at { nil }
   end
 end

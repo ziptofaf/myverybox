@@ -45,6 +45,7 @@ Any value from `config/settings.yml` can be overridden with an environment varia
 
 1. Set a custom uploader
 2. POST {http://yourdomain.example.com}/file_uploads/upload_via_api
-3. Navigate to /api_keys on your instance of MyVeryBox, create a new one.
+3. Navigate to /api_keys on your instance of MyVeryBox and create a new key (pick a description and how long it should be valid).
+   Copy it right away - it is shown only once (only a SHA-256 fingerprint is stored).
 4. Add a header in ShareX - name is api_key, value is your API key value
 5. Set url to {json:url} in response in ShareX, it will contain the path to newly uploaded file. 
