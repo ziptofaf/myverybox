@@ -2,70 +2,56 @@ class FileUploadsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show_via_url, :upload_via_api]
   skip_before_action :verify_authenticity_token, only: [:upload_via_api]
   include ActiveStorage::SetCurrent
+  PER_PAGE = 10
+  # sortable columns of the uploads list (?sort=...&direction=asc|desc)
+  SORT_COLUMNS = {
+    'uploaded' => 'file_uploads.created_at',
+    'size' => 'active_storage_blobs.byte_size'
+  }.freeze
+
   def index
-    @per_page = 10
-    @page = params[:page].to_i || 1
-    if @page == 0
-      @page = 1
-    end
-    if @page == 1
-      offset = 0
-    else
-      offset = (@page - 1) * @per_page
-    end
-    
-    @file_uploads = FileUpload.includes(upload_attachment: :blob).order('id desc').where(user_id: current_user.id).limit(@per_page).offset(offset)
+    scope = uploads_scope.left_joins(upload_attachment: :blob)
+    paginate(sorted(scope))
   end
-  
+
   def search
   end
-  
-  def search_results
-    @page = params[:page].to_i || 1
-    @per_page = 10
 
-    if @page == 0
-      @page = 1
-    end
-    if @page == 1
-      offset = 0
-    else
-      offset = (@page - 1) * @per_page
-    end
-    
-    @file_uploads = FileUpload.joins(upload_attachment: :blob).includes(upload_attachment: :blob).where(user_id: current_user.id)
+  def search_results
+    scope = uploads_scope.joins(upload_attachment: :blob)
     if search_params[:created_at_from].present?
-      @file_uploads = @file_uploads.where('file_uploads.created_at >= ?', search_params[:created_at_from])
+      scope = scope.where('file_uploads.created_at >= ?', search_params[:created_at_from])
     end
 
     if search_params[:created_at_to].present?
-      @file_uploads = @file_uploads.where('file_uploads.created_at <= ?', search_params[:created_at_to])
+      scope = scope.where('file_uploads.created_at <= ?', search_params[:created_at_to])
     end
 
     if search_params[:filename].present?
-      @file_uploads = @file_uploads.where('active_storage_blobs.filename ILIKE ?', contains(search_params[:filename]))
+      scope = scope.where('active_storage_blobs.filename ILIKE ?', contains(search_params[:filename]))
     end
 
     # matches the generated description as well as text found in the image (OCR)
     if search_params[:description].present?
       pattern = contains(search_params[:description])
-      @file_uploads = @file_uploads.where('file_uploads.description ILIKE :q OR file_uploads.caption ILIKE :q', q: pattern)
+      scope = scope.where('file_uploads.description ILIKE :q OR file_uploads.caption ILIKE :q', q: pattern)
     end
 
-    # "What's in the image?" - rank by similarity to the query (SigLIP 2 embeddings)
+    # "What's in the image?" - ranks all embedded images by similarity to the
+    # query (SigLIP 2), so these results are always ordered by relevance.
     if search_params[:content].present?
+      @sorted_by_relevance = true
       query = ImageEmbeddingClient.new.for_text(search_params[:content])
       if query
-        @file_uploads = @file_uploads.nearest_neighbors(:embedding, query.embedding, distance: 'cosine')
+        scope = scope.where.not(embedding: nil)
+        paginate(scope.nearest_neighbors(:embedding, query.embedding, distance: 'cosine'), count_scope: scope)
       else
         flash.now[:error] = 'Searching by image content is unavailable right now (image analysis service unreachable).'
-        @file_uploads = @file_uploads.none
+        paginate(scope.none)
       end
     else
-      @file_uploads = @file_uploads.order('file_uploads.id desc')
+      paginate(sorted(scope))
     end
-
-    @file_uploads = @file_uploads.limit(@per_page).offset(offset)
 
     render "index"
   end
@@ -165,6 +151,28 @@ class FileUploadsController < ApplicationController
   
   def search_params
     params.require(:search).permit(:created_at_from, :created_at_to, :filename, :description, :content)
+  end
+
+  def uploads_scope
+    FileUpload.where(user_id: current_user.id).includes(upload_attachment: :blob)
+  end
+
+  # Orders by the requested column (default: newest first); the id tie-breaker
+  # keeps pages stable when several uploads share a size or timestamp.
+  def sorted(scope)
+    @sort = SORT_COLUMNS.key?(params[:sort]) ? params[:sort] : 'uploaded'
+    @direction = params[:direction] == 'asc' ? 'asc' : 'desc'
+    scope.order(Arel.sql("#{SORT_COLUMNS.fetch(@sort)} #{@direction}, file_uploads.id #{@direction}"))
+  end
+
+  # Sets @file_uploads to the requested page plus the numbers the view needs.
+  # count_scope: same rows without ordering/custom selects (nearest_neighbors adds one).
+  def paginate(scope, count_scope: scope)
+    @per_page = PER_PAGE
+    @total_count = count_scope.unscope(:order).count
+    @total_pages = [(@total_count.to_f / @per_page).ceil, 1].max
+    @page = params[:page].to_i.clamp(1, @total_pages)
+    @file_uploads = scope.limit(@per_page).offset((@page - 1) * @per_page)
   end
 
   # "%term%" with LIKE wildcards in the user's input escaped

@@ -17,13 +17,16 @@
     <p><%= link_to "Upload a new file", new_file_upload_path, class: 'ui button primary' %></p>
     <p><%= link_to "Search for file", search_file_uploads_path %></p>
     <p>Looking for API keys? <%= link_to "Check here.", api_keys_path %></p>
+    <% if @sorted_by_relevance %>
+      <p class="ui grey text">Sorted by best match for "<%= params.dig(:search, :content) %>".</p>
+    <% end %>
     <table class="ui striped table">
       <thead>
       <tr>
         <th>Filename</th>
-        <th>Uploaded at</th>
+        <th><%= sort_header 'Uploaded at', 'uploaded' %></th>
         <th colspan="2">Preview</th>
-        <th>File size</th>
+        <th><%= sort_header 'File size', 'size' %></th>
         <th>Expiration date</th>
         <th>Description</th>
         <th>Text</th>
@@ -56,13 +59,8 @@
       <% end %>
       </tbody>
     </table>
-    <div class="eight wide computer sixteen wide mobile column">
-      <% if @page > 1 %>
-        <%= link_to "<-", params.permit(:page, search: {}).merge(page: @page - 1), class: 'ui primary button'  %>
-      <% end %>
-      <% if @file_uploads.size == @per_page %>
-        <%= link_to "->", params.permit(:page, search: {}).merge(page: @page + 1), class: 'ui primary button' %>
-      <% end %>
+    <div class="list-navigation">
+      <%= pagination_nav(page: @page, total_pages: @total_pages, total_count: @total_count, per_page: @per_page) %>
     </div>
   </div>
   

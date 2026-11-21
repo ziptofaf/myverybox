@@ -54,3 +54,20 @@
   max-height: 150px;
   object-fit: contain;
 }
+
+// pagination under the uploads list
+.list-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  margin-bottom: 2em;
+
+  .list-summary { color: rgba(0, 0, 0, 0.6); }
+}
+
+// sortable column headers
+th a { color: inherit; }
+th a:hover { text-decoration: underline; }
+th a.active-sort { font-weight: bold; }
