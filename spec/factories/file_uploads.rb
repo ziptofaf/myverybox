@@ -3,11 +3,16 @@ FactoryBot.define do
     user
     expires_after { nil }
 
-    after(:build) do |file_upload|
+    transient do
+      fixture { 'upload.png' }
+      content_type { 'image/png' }
+    end
+
+    after(:build) do |file_upload, evaluator|
       file_upload.upload.attach(
-        io: File.open(Rails.root.join('spec', 'fixtures', 'upload.png')),
-        filename: 'upload.png',
-        content_type: 'image/png'
+        io: File.open(Rails.root.join('spec', 'fixtures', evaluator.fixture)),
+        filename: evaluator.fixture,
+        content_type: evaluator.content_type
       )
     end
   end

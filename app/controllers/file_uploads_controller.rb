@@ -59,13 +59,7 @@ class FileUploadsController < ApplicationController
     @file_upload = FileUpload.find_by(user_id: current_user.id, id: params[:id])
     if @file_upload && @file_upload.active?
       attachment = @file_upload.upload.attachment
-      send_file(
-        ActiveStorage::Blob.service.path_for(attachment.key),
-        filename: attachment.blob.filename.to_s,
-        type: attachment.blob.content_type,
-        status: :ok,
-        disposition: 'inline'
-      )
+      send_upload(attachment)
     else
       render dashboard_not_found_path, status: 404
     end
@@ -81,13 +75,7 @@ class FileUploadsController < ApplicationController
     if @file_upload.present? && @file_upload.active?
       attachment = @file_upload.upload.attachment
 
-      send_file(
-        ActiveStorage::Blob.service.path_for(attachment.key),
-        filename: attachment.blob.filename.to_s,
-        type: attachment.blob.content_type,
-        status: :ok,
-        disposition: 'inline'
-      )
+      send_upload(attachment)
     else
       render dashboard_not_found_path, status: 404
     end
@@ -138,6 +126,27 @@ class FileUploadsController < ApplicationController
   end
   
   private
+
+  # Content that browsers treat as active documents (HTML, SVG, XML, ...) is
+  # sandboxed: it still renders, but cannot run scripts or act as this origin
+  # (e.g. use the signed-in user's session). Rails' own Active Storage
+  # routes avoid this by forcing a download; these links are meant to be
+  # viewable in the browser, hence the CSP sandbox instead.
+  ACTIVE_CONTENT_CSP = "sandbox; default-src 'none'; img-src data:; style-src 'unsafe-inline'".freeze
+
+  def send_upload(attachment)
+    if ActiveStorage.content_types_to_serve_as_binary.include?(attachment.blob.content_type)
+      response.headers['Content-Security-Policy'] = ACTIVE_CONTENT_CSP
+    end
+
+    send_file(
+      ActiveStorage::Blob.service.path_for(attachment.key),
+      filename: attachment.blob.filename.to_s,
+      type: attachment.blob.content_type,
+      status: :ok,
+      disposition: 'inline'
+    )
+  end
   
   def search_params
     params.require(:search).permit(:created_at_from, :created_at_to, :filename, :description)

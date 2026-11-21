@@ -49,3 +49,8 @@
   max-width: unset;
   max-height: unset;
 }
+// SVGs are shown as-is (not resized server-side); keep them thumbnail-sized.
+.svg-miniature {
+  max-height: 150px;
+  object-fit: contain;
+}
