@@ -7,11 +7,19 @@
 # reverse proxy (e.g. nginx) in front of it, or set RAILS_FORCE_SSL=false to
 # use it over plain http locally.
 
+x-logging: &logging
+  # rotate container logs (docker's default json-file driver keeps them forever)
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
 services:
   web:
     build: .
     image: ${WEB_IMAGE:-myverybox}
     restart: unless-stopped
+    logging: *logging
     depends_on:
       db:
         condition: service_healthy
@@ -34,11 +42,15 @@ services:
     build: ./clippy
     image: ${CLIPPY_IMAGE:-myverybox-clippy}
     restart: unless-stopped
+    # python as PID 1 ignores SIGTERM; a tiny init forwards signals so stop is instant
+    init: true
+    logging: *logging
     # Not published: only the web container talks to it.
 
   db:
     image: docker.io/library/postgres:18
     restart: unless-stopped
+    logging: *logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-myverybox}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
