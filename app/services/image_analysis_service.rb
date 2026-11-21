@@ -7,7 +7,7 @@ class ImageAnalysisService
     return unless enabled?
 
     path = Settings.hostname + "/show/" + @file_upload.url
-    res = HTTParty.get(Settings.image_analysis_hostname + "/?file_path=#{path}", timeout: 8)
+    res = HTTParty.get(Settings.image_analysis_hostname + "/?file_path=#{path}", timeout: 30)
     if res.code == 200
       @file_upload.update(description: res.body.encode("UTF-8", invalid: :replace, undef: :replace, replace: '?'))
     end
