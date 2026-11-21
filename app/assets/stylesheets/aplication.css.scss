@@ -12,6 +12,37 @@
   text-overflow: ellipsis;
 }
 
+.hover-preview {
+  position: relative;
+  display: inline-block;
+
+  .hover-preview-image {
+    display: none;
+    // pinned to the right side of the window rather than next to the
+    // thumbnail, so it is fully visible for every row (incl. the bottom ones)
+    // and does not cover the preview column itself
+    position: fixed;
+    top: 50%;
+    right: 2em;
+    transform: translateY(-50%);
+    z-index: 1000;
+    max-width: 45vw;
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    background: #fff;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    // never steal the hover from the thumbnail, so the preview cannot flicker
+    pointer-events: none;
+  }
+
+  &:hover .hover-preview-image {
+    display: block;
+  }
+}
+
 .truncated-text:hover {
   overflow: visible;
   white-space: normal;

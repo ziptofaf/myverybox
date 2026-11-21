@@ -11,6 +11,22 @@ RSpec.describe "FileUploads", type: :request do
       get "/file_uploads"
       expect(response).to have_http_status(:success)
     end
+
+    it "renders a lazily loaded larger preview for image uploads" do
+      create(:file_upload, user:)
+      get "/file_uploads"
+
+      preview = Nokogiri::HTML(response.body).at_css('.hover-preview img.hover-preview-image')
+      expect(preview).to be_present
+      expect(preview['loading']).to eq 'lazy'
+      expect(preview['src']).to include('/rails/active_storage/representations/')
+
+      get preview['src']
+      expect(response).to have_http_status(:redirect)
+      follow_redirect!
+      expect(response).to have_http_status(:success)
+      expect(response.media_type).to eq 'image/png'
+    end
   end
   
   describe "GET /show" do
