@@ -36,7 +36,14 @@
       <tbody>
       <% @file_uploads.each do |file_upload| %>
         <tr class="<%= file_upload.active? ? '' : 'disabled' %>">
-          <td><%= file_upload.upload.blob.filename %></td>
+          <td>
+            <%= file_upload.upload.blob.filename %>
+            <% if file_upload.converted.attached? %>
+              <div class="ui tiny basic label" title="Shown as <%= file_upload.converted.blob.filename.extension.upcase %>; the original is kept">
+                <%= file_upload.upload.blob.filename.extension.upcase %> → <%= file_upload.converted.blob.filename.extension.upcase %>
+              </div>
+            <% end %>
+          </td>
           <td><%= file_upload.created_at %></td>
           <td colspan="2"><%= miniature_for(file_upload) %></td>
           <td><%= file_upload.megabyte_size %>MB</td>
@@ -50,6 +57,9 @@
           <td>
             <% if file_upload.active? %>
               <%= link_to "View", "/show/#{file_upload.url}", class: 'ui primary button', target: '_blank' %>
+              <% if file_upload.conversion %>
+                <%= link_to "Original", original_upload_path(url: file_upload.url), class: 'ui button', title: "Download the original #{file_upload.upload.blob.filename.extension.upcase} file" %>
+              <% end %>
               <%= button_to "Remove", file_upload, method: :delete, form: {class: 'inline-form', data: { turbo_confirm: 'Are you sure?' } }, class: 'ui inline button red' %>
             <% else %>
               <p>File has expired.</p>

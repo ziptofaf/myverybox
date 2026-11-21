@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   end
   resources :api_keys, only: [:index, :create, :destroy]
   
+  get "show/:url/original" => "file_uploads#show_original_via_url", as: :original_upload
   get "show(/:url)" => "file_uploads#show_via_url"
   get 'dashboard/index'
   get 'dashboard/not_found'

@@ -85,6 +85,7 @@ RSpec.describe "Uploads list: pagination and sorting", type: :request do
     end
 
     it 'orders "What\'s in the image?" results by relevance and counts only embedded images' do
+      Setting.find_or_initialize_by(name: Setting::IMAGE_ANALYSIS).update!(value_type: 'bool', value: '1')
       a = upload('a.png', size: 1, created_at: 1.day.ago).tap { |f| f.update_columns(embedding: Array.new(768) { |i| i.zero? ? 1.0 : 0.0 }) }
       upload('b.png', size: 2, created_at: 2.days.ago) # no embedding yet
       client = instance_double(ImageEmbeddingClient)

@@ -9,7 +9,7 @@ class ImageAnalysisService
   def call
     return unless enabled?
 
-    blob = @file_upload.upload.blob
+    blob = @file_upload.display_blob
     return unless blob.content_type.to_s.start_with?('image/')
 
     res = HTTParty.post(
@@ -28,6 +28,6 @@ class ImageAnalysisService
   private
 
   def enabled?
-    Setting.find_by(name: 'image_description_analysis')&.formatted_value == true
+    Setting.image_analysis_enabled?
   end
 end

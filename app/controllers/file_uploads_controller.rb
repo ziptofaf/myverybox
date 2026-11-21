@@ -1,5 +1,5 @@
 class FileUploadsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:show_via_url, :upload_via_api]
+  skip_before_action :authenticate_user!, only: [:show_via_url, :show_original_via_url, :upload_via_api]
   skip_before_action :verify_authenticity_token, only: [:upload_via_api]
   include ActiveStorage::SetCurrent
   PER_PAGE = 10
@@ -15,6 +15,7 @@ class FileUploadsController < ApplicationController
   end
 
   def search
+    @image_search_enabled = Setting.image_analysis_enabled?
   end
 
   def search_results
@@ -39,7 +40,8 @@ class FileUploadsController < ApplicationController
 
     # "What's in the image?" - ranks all embedded images by similarity to the
     # query (SigLIP 2), so these results are always ordered by relevance.
-    if search_params[:content].present?
+    # (ignored while image analysis is disabled, e.g. from an old bookmarked link)
+    if search_params[:content].present? && Setting.image_analysis_enabled?
       @sorted_by_relevance = true
       query = ImageEmbeddingClient.new.for_text(search_params[:content])
       if query
@@ -59,7 +61,7 @@ class FileUploadsController < ApplicationController
   def show
     @file_upload = FileUpload.find_by(user_id: current_user.id, id: params[:id])
     if @file_upload && @file_upload.active?
-      attachment = @file_upload.upload.attachment
+      attachment = @file_upload.display_attachment!
       send_upload(attachment)
     else
       render dashboard_not_found_path, status: 404
@@ -74,7 +76,7 @@ class FileUploadsController < ApplicationController
   def show_via_url
     @file_upload = FileUpload.find_by(url: params[:url])
     if @file_upload.present? && @file_upload.active?
-      attachment = @file_upload.upload.attachment
+      attachment = @file_upload.display_attachment!
 
       send_upload(attachment)
     else
@@ -82,6 +84,16 @@ class FileUploadsController < ApplicationController
     end
   end
   
+  # The untouched upload, for formats that are served converted by default.
+  def show_original_via_url
+    @file_upload = FileUpload.find_by(url: params[:url])
+    if @file_upload.present? && @file_upload.active?
+      send_upload(@file_upload.upload.attachment, disposition: 'attachment')
+    else
+      render dashboard_not_found_path, status: 404
+    end
+  end
+
   def new
     @file_upload = FileUpload.new
   end
@@ -117,7 +129,10 @@ class FileUploadsController < ApplicationController
         end
       end
       if @file_upload.save
-        render json: {status: 'ok', url: Settings.hostname + "/show/" + @file_upload.url}
+        payload = { status: 'ok', url: Settings.hostname + "/show/" + @file_upload.url }
+        # url serves the converted copy for formats browsers can't show; the original stays available
+        payload[:original_url] = "#{payload[:url]}/original" if @file_upload.conversion
+        render json: payload
       else
         render json: {status: 'error'}, status: 500
       end
@@ -135,7 +150,7 @@ class FileUploadsController < ApplicationController
   # viewable in the browser, hence the CSP sandbox instead.
   ACTIVE_CONTENT_CSP = "sandbox; default-src 'none'; img-src data:; style-src 'unsafe-inline'".freeze
 
-  def send_upload(attachment)
+  def send_upload(attachment, disposition: 'inline')
     if ActiveStorage.content_types_to_serve_as_binary.include?(attachment.blob.content_type)
       response.headers['Content-Security-Policy'] = ACTIVE_CONTENT_CSP
     end
@@ -145,7 +160,7 @@ class FileUploadsController < ApplicationController
       filename: attachment.blob.filename.to_s,
       type: attachment.blob.content_type,
       status: :ok,
-      disposition: 'inline'
+      disposition: disposition
     )
   end
   
@@ -154,7 +169,7 @@ class FileUploadsController < ApplicationController
   end
 
   def uploads_scope
-    FileUpload.where(user_id: current_user.id).includes(upload_attachment: :blob)
+    FileUpload.where(user_id: current_user.id).includes(upload_attachment: :blob, converted_attachment: :blob)
   end
 
   # Orders by the requested column (default: newest first); the id tie-breaker

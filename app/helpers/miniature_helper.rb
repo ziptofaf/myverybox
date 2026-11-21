@@ -1,6 +1,6 @@
 module MiniatureHelper
   def miniature_for(file_upload)
-    blob = file_upload.upload.blob
+    blob = file_upload.display_blob
     if blob.content_type.to_s == 'image/svg+xml'
       # Active Storage refuses to transform SVGs (they can contain scripts).
       # Showing the file itself is safe in an <img>: browsers never run

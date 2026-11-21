@@ -6,7 +6,7 @@ require 'open3'
 # - free space on the filesystem that actually holds the uploaded files
 class StorageStats
   Uploads = Data.define(:count, :bytes, :expired_count, :expired_bytes, :all_blobs_bytes) do
-    # thumbnails/previews are stored as blobs too, but don't belong to an upload
+    # thumbnails, previews and converted copies are blobs too, but aren't the uploads themselves
     def generated_bytes = [all_blobs_bytes - bytes, 0].max
   end
 

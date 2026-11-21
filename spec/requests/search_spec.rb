@@ -13,6 +13,26 @@ RSpec.describe "Searching uploads", type: :request do
     get "/file_uploads/search_results", params: { search: params }
   end
 
+  def image_analysis(enabled)
+    Setting.find_or_initialize_by(name: Setting::IMAGE_ANALYSIS).update!(value_type: 'bool', value: enabled ? '1' : '0')
+  end
+
+  describe 'the search form' do
+    it "offers \"What's in the image?\" when image analysis is enabled" do
+      image_analysis(true)
+      get '/file_uploads/search'
+      expect(response.body).to include("What&#39;s in the image?")
+    end
+
+    it 'hides it when image analysis is disabled' do
+      image_analysis(false)
+      get '/file_uploads/search'
+      expect(response).to have_http_status(:success)
+      expect(response.body).not_to include("What&#39;s in the image?")
+      expect(response.body).to include('Name of the file')
+    end
+  end
+
   def listed_ids
     Nokogiri::HTML(response.body).css('tbody tr').map { |row| row.at_css('td').text.strip }
   end
@@ -24,6 +44,7 @@ RSpec.describe "Searching uploads", type: :request do
     let(:client) { instance_double(ImageEmbeddingClient) }
 
     before do
+      image_analysis(true)
       dog.upload.blob.update!(filename: 'dog.png')
       cat.upload.blob.update!(filename: 'cat.png')
       not_embedded.upload.blob.update!(filename: 'other.png')
@@ -49,6 +70,17 @@ RSpec.describe "Searching uploads", type: :request do
       search(content: 'a cat')
 
       expect(listed_ids).not_to include('someone-elses.png')
+    end
+
+    it 'ignores the image query while image analysis is disabled (e.g. an old bookmarked link)' do
+      image_analysis(false)
+      expect(client).not_to receive(:for_text)
+
+      search(content: 'a cat')
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).not_to include('Sorted by best match')
+      expect(listed_ids).to eq %w[other.png cat.png dog.png] # regular newest-first list
     end
 
     it 'shows an error instead of crashing when the analysis service is down' do
