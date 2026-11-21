@@ -44,11 +44,16 @@ services:
     restart: unless-stopped
     # python as PID 1 ignores SIGTERM; a tiny init forwards signals so stop is instant
     init: true
+    # ~2.2 GB at peak with both models; if it ever exceeds this, only clippy is
+    # OOM-killed (and restarted) instead of the host's OOM killer picking e.g. postgres
+    mem_limit: 4g
     logging: *logging
     # Not published: only the web container talks to it.
 
   db:
-    image: docker.io/library/postgres:18
+    # PostgreSQL 18 + pgvector (semantic search), see postgres/Dockerfile
+    build: ./postgres
+    image: ${DB_IMAGE:-myverybox-db}
     restart: unless-stopped
     logging: *logging
     environment:

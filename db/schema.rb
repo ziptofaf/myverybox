@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_21_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_220000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "vector"
 
   create_table "active_storage_attachments", id: :serial, force: :cascade do |t|
     t.string "name", null: false
@@ -63,6 +64,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_170000) do
     t.datetime "updated_at", null: false
     t.text "description"
     t.text "caption"
+    t.vector "embedding", limit: 768
+    t.string "embedding_model"
     t.index ["url"], name: "index_file_uploads_on_url", unique: true
     t.index ["user_id"], name: "index_file_uploads_on_user_id"
   end

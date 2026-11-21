@@ -33,25 +33,40 @@ class FileUploadsController < ApplicationController
       offset = (@page - 1) * @per_page
     end
     
-    @file_uploads = FileUpload.joins(upload_attachment: :blob).includes(upload_attachment: :blob).order('file_uploads.id desc').where(user_id: current_user.id)
+    @file_uploads = FileUpload.joins(upload_attachment: :blob).includes(upload_attachment: :blob).where(user_id: current_user.id)
     if search_params[:created_at_from].present?
-      @file_uploads = @file_uploads.where('created_at >= ?', search_params[:created_at_from])
+      @file_uploads = @file_uploads.where('file_uploads.created_at >= ?', search_params[:created_at_from])
     end
 
     if search_params[:created_at_to].present?
-      @file_uploads = @file_uploads.where('created_at <= ?', search_params[:created_at_to])
+      @file_uploads = @file_uploads.where('file_uploads.created_at <= ?', search_params[:created_at_to])
     end
-    
+
     if search_params[:filename].present?
-      @file_uploads = @file_uploads.where('filename LIKE ?', "%#{search_params[:filename]}%")
+      @file_uploads = @file_uploads.where('active_storage_blobs.filename ILIKE ?', contains(search_params[:filename]))
     end
-    
+
+    # matches the generated description as well as text found in the image (OCR)
     if search_params[:description].present?
-      @file_uploads = @file_uploads.where('description LIKE ?', "%#{search_params[:description]}%")
+      pattern = contains(search_params[:description])
+      @file_uploads = @file_uploads.where('file_uploads.description ILIKE :q OR file_uploads.caption ILIKE :q', q: pattern)
     end
-    
-      @file_uploads = @file_uploads.limit(@per_page).offset(offset)
-    
+
+    # "What's in the image?" - rank by similarity to the query (SigLIP 2 embeddings)
+    if search_params[:content].present?
+      query = ImageEmbeddingClient.new.for_text(search_params[:content])
+      if query
+        @file_uploads = @file_uploads.nearest_neighbors(:embedding, query.embedding, distance: 'cosine')
+      else
+        flash.now[:error] = 'Searching by image content is unavailable right now (image analysis service unreachable).'
+        @file_uploads = @file_uploads.none
+      end
+    else
+      @file_uploads = @file_uploads.order('file_uploads.id desc')
+    end
+
+    @file_uploads = @file_uploads.limit(@per_page).offset(offset)
+
     render "index"
   end
 
@@ -149,7 +164,12 @@ class FileUploadsController < ApplicationController
   end
   
   def search_params
-    params.require(:search).permit(:created_at_from, :created_at_to, :filename, :description)
+    params.require(:search).permit(:created_at_from, :created_at_to, :filename, :description, :content)
+  end
+
+  # "%term%" with LIKE wildcards in the user's input escaped
+  def contains(term)
+    "%#{FileUpload.sanitize_sql_like(term.to_s)}%"
   end
   
   def file_upload_params

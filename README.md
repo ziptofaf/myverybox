@@ -8,16 +8,19 @@ applications such as ShareX.
 The whole stack is defined in `docker-compose.yml`:
 
 - `web` - the Rails app (includes tesseract for OCR, ImageMagick and ffmpeg for previews)
-- `clippy` - image description service ([Florence-2](https://huggingface.co/microsoft/Florence-2-base) on CPU, model baked into the image), see `clippy/`
-- `db` - PostgreSQL
+- `clippy` - image analysis service on CPU: descriptions ([Florence-2](https://huggingface.co/florence-community/Florence-2-base)) and
+  embeddings for search by image content ([SigLIP 2](https://huggingface.co/google/siglip2-base-patch16-256)); models are baked into the image, see `clippy/`
+- `db` - PostgreSQL with pgvector, see `postgres/`
 
 Uploaded files and the database are kept in the `storage` and `db` volumes.
 
 1. `cp .env.example .env` and fill it in (`APP_HOSTNAME`, `SECRET_KEY_BASE`, `POSTGRES_PASSWORD`).
-2. `docker compose up -d --build` (or set `WEB_IMAGE` / `CLIPPY_IMAGE` in `.env` to use the
+2. `docker compose up -d --build` (or set `WEB_IMAGE` / `CLIPPY_IMAGE` / `DB_IMAGE` in `.env` to use the
    prebuilt images from GitHub Container Registry and run `docker compose pull && docker compose up -d`).
 3. Create a user: `docker compose exec web bin/rails runner 'User.create!(email: "you@example.com", password: "yourpassword")'`
-4. Optionally enable image descriptions under System settings.
+4. Optionally enable image analysis under System settings: new image uploads then get a description
+   (Florence-2) and an embedding for searching by image content (SigLIP 2, stored with pgvector).
+   For files uploaded before it was enabled, run: `docker compose exec web bin/rails embeddings:backfill`
 
 The app listens on `127.0.0.1:3000` and expects a TLS-terminating reverse proxy (e.g. nginx) in front
 of it. To try it locally over plain http, set `RAILS_FORCE_SSL=false` in `.env`.

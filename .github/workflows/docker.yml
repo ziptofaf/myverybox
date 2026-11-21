@@ -4,6 +4,7 @@ name: Docker images
 # Registry:
 #   ghcr.io/<owner>/<repo>:latest         (Rails app)
 #   ghcr.io/<owner>/<repo>-clippy:latest  (image description service)
+#   ghcr.io/<owner>/<repo>-db:latest      (PostgreSQL + pgvector)
 # Each image is also tagged with the commit SHA.
 
 on:
@@ -27,6 +28,9 @@ jobs:
           - name: clippy
             context: ./clippy
             suffix: "-clippy"
+          - name: db
+            context: ./postgres
+            suffix: "-db"
     steps:
       - uses: actions/checkout@v4
 

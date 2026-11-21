@@ -78,3 +78,6 @@ gem "devise", "~> 5.0"
 # newer rdoc in the gem path registers a duplicate RubyGems plugin and every
 # command prints "already initialized constant RDoc::..." warnings.
 gem "rdoc", "~> 7.0.4", require: false
+
+# pgvector support for Active Record (semantic search over image embeddings)
+gem "neighbor"

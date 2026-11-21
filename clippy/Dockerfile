@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
-# Image description service (Florence-2 on CPU), used by the Rails app to fill
-# in FileUpload#description.
+# Image analysis service used by the Rails app (CPU only):
+# - image descriptions (Florence-2) for FileUpload#description
+# - image/text embeddings (SigLIP 2) for semantic search
 FROM docker.io/library/python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -21,12 +22,18 @@ COPY requirements.txt .
 # multi-GB CUDA builds from PyPI can never be picked.
 RUN pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple -r requirements.txt
 
-# Bake the model into the image so containers start without network access.
+# Bake the models into the image so containers start without network access.
+# Florence-2: image descriptions.
 ARG MODEL_ID=florence-community/Florence-2-base
 ARG MODEL_REVISION=00921df66db728a9ceb750f5eca43e5c203a2051
+# SigLIP 2: image/text embeddings for semantic search.
+ARG EMBEDDING_MODEL_ID=google/siglip2-base-patch16-256
+ARG EMBEDDING_MODEL_REVISION=3f9f96cb90da5dbc758b01813f2f6f1aee24c1ab
 ENV MODEL_ID=${MODEL_ID} \
-    MODEL_REVISION=${MODEL_REVISION}
-RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('${MODEL_ID}', revision='${MODEL_REVISION}')" && \
+    MODEL_REVISION=${MODEL_REVISION} \
+    EMBEDDING_MODEL_ID=${EMBEDDING_MODEL_ID} \
+    EMBEDDING_MODEL_REVISION=${EMBEDDING_MODEL_REVISION}
+RUN python -c "from huggingface_hub import snapshot_download as d; d('${MODEL_ID}', revision='${MODEL_REVISION}'); d('${EMBEDDING_MODEL_ID}', revision='${EMBEDDING_MODEL_REVISION}')" && \
     chmod -R a+rX "${HF_HOME}"
 
 COPY main.py .

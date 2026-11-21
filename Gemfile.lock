@@ -176,6 +176,8 @@ GEM
     msgpack (1.8.7)
     multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)
+    neighbor (1.2.0)
+      activerecord (>= 7.2)
     net-imap (0.6.8)
       date
       net-protocol
@@ -359,6 +361,7 @@ DEPENDENCIES
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
+  neighbor
   pg
   puma (>= 5.0)
   rails (~> 8.1.4)

@@ -12,11 +12,16 @@
           <%= f.date_field :created_at_to %>
         </div>
         <div class="field">
+          <%= f.label :content, "What's in the image?" %>
+          <%= f.text_field :content, placeholder: 'e.g. a dog on a beach, a receipt, a screenshot of a terminal' %>
+          <small>Finds images by their content, even if no description mentions it. Results are ordered from the best match.</small>
+        </div>
+        <div class="field">
           <%= f.label :filename, 'Name of the file (can be just part of it)' %>
           <%= f.text_field :filename %>
         </div>
     <div class="field">
-      <%= f.label :description, 'File description (can be just part of it)' %>
+      <%= f.label :description, 'Text in the description or in the image (can be just part of it)' %>
       <%= f.text_field :description %>
     </div>
         <div class="field">

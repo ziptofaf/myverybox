@@ -1,6 +1,7 @@
 class FileUpload < ApplicationRecord
   belongs_to :user
   has_one_attached :upload
+  has_neighbors :embedding
   before_create :generate_url
   after_create_commit :fill_metadata
   
@@ -28,5 +29,16 @@ class FileUpload < ApplicationRecord
   def fill_metadata
     DescriptionFillingJob.set(wait: 1.second).perform_later(id)
     FileUploadCaptionJob.set(wait: 10.seconds).perform_later(id)
+    FileUploadEmbeddingJob.set(wait: 5.seconds).perform_later(id)
+  end
+
+  # Fetches and stores the image embedding (semantic search). Returns true when
+  # an embedding was stored; non-images and clippy outages just return false.
+  def store_embedding!(client: ImageEmbeddingClient.new)
+    result = client.for_blob(upload.blob)
+    return false unless result
+
+    update_columns(embedding: result.embedding, embedding_model: result.model)
+    true
   end
 end
