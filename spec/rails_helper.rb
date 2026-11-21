@@ -32,6 +32,10 @@ end
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
+  # Run every example inside a transaction that is rolled back afterwards, so
+  # records created by one example never leak into the next one.
+  config.use_transactional_fixtures = true
+
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
