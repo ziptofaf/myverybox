@@ -1,0 +1,57 @@
+# Full MyVeryBox stack: Rails app + clippy (image descriptions) + PostgreSQL.
+#
+#   cp .env.example .env    # then fill in the values
+#   docker compose up -d --build
+#
+# The app is published on 127.0.0.1:${WEB_PORT:-3000}; put a TLS-terminating
+# reverse proxy (e.g. nginx) in front of it, or set RAILS_FORCE_SSL=false to
+# use it over plain http locally.
+
+services:
+  web:
+    build: .
+    image: ${WEB_IMAGE:-myverybox}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-myverybox}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-myverybox_production}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?set SECRET_KEY_BASE in .env}
+      RAILS_FORCE_SSL: ${RAILS_FORCE_SSL:-true}
+      RAILS_LOG_LEVEL: ${RAILS_LOG_LEVEL:-info}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      SETTINGS__HOSTNAME: ${APP_HOSTNAME:?set APP_HOSTNAME in .env}
+      SETTINGS__IMAGE_ANALYSIS_HOSTNAME: http://clippy:3001
+    ports:
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-3000}:3000"
+    volumes:
+      # named volume by default; set STORAGE_PATH to a host directory to bind-mount it
+      # instead (must be writable by uid 1000)
+      - ${STORAGE_PATH:-storage}:/rails/storage
+
+  clippy:
+    build: ./clippy
+    image: ${CLIPPY_IMAGE:-myverybox-clippy}
+    restart: unless-stopped
+    # Not published: only the web container talks to it.
+
+  db:
+    image: docker.io/library/postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-myverybox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-myverybox_production}
+    volumes:
+      # postgres 18+ images keep data in a versioned subdirectory of this path
+      - db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  storage:
+  db:

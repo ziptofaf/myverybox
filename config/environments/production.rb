@@ -49,7 +49,11 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # On by default (production sits behind an SSL-terminating nginx); set
+  # RAILS_FORCE_SSL=false to run the production image over plain http, e.g. locally.
+  config.force_ssl = ENV.fetch("RAILS_FORCE_SSL", "true") != "false"
+  # Let container/load balancer health checks hit /up over plain http.
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new(STDOUT)

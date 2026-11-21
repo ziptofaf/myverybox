@@ -22,7 +22,10 @@ Config.setup do |config|
 
   # Load environment variables from the `ENV` object and override any settings defined in files.
   #
-  # config.use_env = false
+  # Enabled so the docker images can be configured purely via ENV, e.g.
+  #   SETTINGS__HOSTNAME=https://myverybox.com
+  #   SETTINGS__IMAGE_ANALYSIS_HOSTNAME=http://clippy:3001
+  config.use_env = true
 
   # Define ENV variable prefix deciding which variables to load into config.
   #
@@ -37,7 +40,7 @@ Config.setup do |config|
   # with Heroku, but you might want to change it for example for '__' to easy override settings from command line, where
   # using dots in variable names might not be allowed (eg. Bash).
   #
-  # config.env_separator = '.'
+  config.env_separator = '__'
 
   # Ability to process variables names:
   #   * nil  - no change

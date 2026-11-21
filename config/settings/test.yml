@@ -1,0 +1,2 @@
+hostname: 'http://myverybox.test'
+image_analysis_hostname: 'http://clippy.test:3001'
