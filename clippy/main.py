@@ -1,33 +1,28 @@
 from PIL import Image, UnidentifiedImageError
-from transformers import AutoProcessor, AutoModelForCausalLM
+from transformers import AutoProcessor, Florence2ForConditionalGeneration
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
-import requests
+from urllib.parse import urlparse
 import torch
 import io
 import os
 
-MODEL_ID = os.environ.get("MODEL_ID", "microsoft/Florence-2-base")
-# Pinned so the downloaded weights *and* the remote modeling code
-# (trust_remote_code) cannot change underneath us.
-MODEL_REVISION = os.environ.get("MODEL_REVISION", "5ca5edf5bd017b9919c05d08aebef5e4c7ac3bac")
+# Transformers-native Florence-2 checkpoint: no trust_remote_code, so nothing
+# from the model repository is ever executed. Pinned to an exact revision.
+MODEL_ID = os.environ.get("MODEL_ID", "florence-community/Florence-2-base")
+MODEL_REVISION = os.environ.get("MODEL_REVISION", "00921df66db728a9ceb750f5eca43e5c203a2051")
 TASK = os.environ.get("TASK", "<MORE_DETAILED_CAPTION>")  # or "<CAPTION>" / "<DETAILED_CAPTION>"
 HOST = os.environ.get("HOST", "localhost")
 PORT = int(os.environ.get("PORT", "3001"))
 MAX_UPLOAD_BYTES = int(os.environ.get("MAX_UPLOAD_BYTES", str(100 * 1024 * 1024)))
+# Refuse absurdly large images instead of letting Pillow allocate for them.
+Image.MAX_IMAGE_PIXELS = int(os.environ.get("MAX_IMAGE_PIXELS", str(100_000_000)))
 
 
 def load_model():
     print(f"Loading {MODEL_ID}@{MODEL_REVISION}...", flush=True)
-    processor = AutoProcessor.from_pretrained(
-        MODEL_ID, revision=MODEL_REVISION, trust_remote_code=True
-    )
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID,
-        revision=MODEL_REVISION,
-        trust_remote_code=True,
-        torch_dtype=torch.float32,
-        attn_implementation="eager",
+    processor = AutoProcessor.from_pretrained(MODEL_ID, revision=MODEL_REVISION)
+    model = Florence2ForConditionalGeneration.from_pretrained(
+        MODEL_ID, revision=MODEL_REVISION, dtype=torch.float32
     ).eval()
     print("Model loaded.", flush=True)
     return processor, model
@@ -37,8 +32,7 @@ def describe(processor, model, image: Image.Image) -> str:
     inputs = processor(text=TASK, images=image, return_tensors="pt")
     with torch.no_grad():
         generated_ids = model.generate(
-            input_ids=inputs["input_ids"],
-            pixel_values=inputs["pixel_values"],
+            **inputs,
             max_new_tokens=256,
             num_beams=3,
             do_sample=False,
@@ -54,25 +48,10 @@ def run():
     processor, model = load_model()
 
     class Handler(BaseHTTPRequestHandler):
-        # GET /?file_path=<url>  - downloads the image from <url> (original API)
         def do_GET(self):
-            parsed_url = urlparse(self.path)
-            if parsed_url.path == "/up":
+            if urlparse(self.path).path == "/up":
                 return self.respond(200, "ok")
-
-            file_path = parse_qs(parsed_url.query).get("file_path", [None])[0]
-            if not file_path:
-                return self.respond(400, "Missing 'file_path' parameter")
-
-            try:
-                content = requests.get(file_path, timeout=30).content
-            except (
-                requests.exceptions.MissingSchema,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.Timeout,
-            ):
-                return self.respond(400, "Invalid image file")
-            self.describe_bytes(content)
+            self.respond(404, "Not found")
 
         # POST /  - image bytes in the request body (used by the Rails app)
         def do_POST(self):
@@ -87,7 +66,7 @@ def run():
             try:
                 image = Image.open(io.BytesIO(content)).convert("RGB")
                 self.respond(200, describe(processor, model, image))
-            except UnidentifiedImageError:
+            except (UnidentifiedImageError, Image.DecompressionBombError):
                 self.respond(400, "Invalid image file")
             except Exception as e:
                 self.respond(500, f"Error: {e}")

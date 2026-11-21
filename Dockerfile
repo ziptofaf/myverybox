@@ -19,7 +19,8 @@ WORKDIR /rails
 # - ffmpeg: video previews
 # - tesseract-ocr(-eng): OCR for FileUpload#caption (rtesseract)
 # - libjemalloc2: lower memory usage / fragmentation for Ruby
-RUN apt-get update -qq && \
+# (apt-get upgrade picks up Debian security fixes released since the base image was built)
+RUN apt-get update -qq && apt-get upgrade -y && \
     apt-get install --no-install-recommends -y \
       curl libpq5 libjemalloc2 imagemagick ffmpeg tesseract-ocr tesseract-ocr-eng && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
