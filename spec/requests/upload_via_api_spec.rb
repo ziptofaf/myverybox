@@ -29,6 +29,16 @@ RSpec.describe "Uploading via the API", type: :request do
     end
   end
 
+  it 'rejects an expiry in the past with the reason' do
+    key = user.api_keys.create!(description: 'ShareX')
+
+    post "/file_uploads/upload_via_api", params: { upload: file, expires_after: 1.day.ago.iso8601 },
+                                         headers: { 'HTTP_API_KEY' => key.token }
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.parsed_body['errors']).to include('Expires after must be in the future')
+  end
+
   it 'rejects an unknown key' do
     expect { upload('mvb_not-a-real-key') }.not_to change { FileUpload.count }
 

@@ -99,22 +99,24 @@ class FileUploadsController < ApplicationController
   end
   
   def create
-    @file_upload = FileUpload.new(file_upload_params)
-    if file_upload_params[:expires_in_seconds].blank? && file_upload_params[:expires_after].blank?
+    @file_upload = FileUpload.new(file_upload_params.except(:expires_after))
+    @file_upload.expires_after = expiry_from_form
+    if @file_upload.expires_after.blank? && file_upload_params[:expires_in_seconds].blank?
       setting = Setting.find_by(name: 'expires_in_seconds')
-      if setting
-        @file_upload.expires_in_seconds = setting.formatted_value
-      end
+      @file_upload.expires_in_seconds = setting.formatted_value if setting
     end
     @file_upload.user = current_user
     @file_upload.generate_url
-    if @file_upload.save
+
+    if invalid_expiry_entered?
+      @file_upload.errors.add(:expires_after, 'is not a valid date and time')
+      render :new, status: :unprocessable_content
+    elsif @file_upload.save
       redirect_to file_uploads_path, notice: 'File uploaded successfully'
     else
-      render :new, error: 'Error uploading file'
+      render :new, status: :unprocessable_content
     end
   end
-
 
   def upload_via_api
     api_key = ApiKey.authenticate(request.headers["HTTP_API_KEY"])
@@ -134,7 +136,7 @@ class FileUploadsController < ApplicationController
         payload[:original_url] = "#{payload[:url]}/original" if @file_upload.conversion
         render json: payload
       else
-        render json: {status: 'error'}, status: 500
+        render json: { status: 'error', errors: @file_upload.errors.full_messages }, status: :unprocessable_content
       end
     else
       render json: {status: 'error'}, status: 403
@@ -188,6 +190,24 @@ class FileUploadsController < ApplicationController
     @total_pages = [(@total_count.to_f / @per_page).ceil, 1].max
     @page = params[:page].to_i.clamp(1, @total_pages)
     @file_uploads = scope.limit(@per_page).offset((@page - 1) * @per_page)
+  end
+
+  # The form's datetime-local value carries no time zone: interpret it in the
+  # browser's zone (sent along as time_zone), falling back to the app's (UTC).
+  def expiry_from_form
+    raw = file_upload_params[:expires_after].to_s.strip
+    # exactly what <input type="datetime-local"> submits; Time.zone.parse alone
+    # is lenient and would turn e.g. "next tuesday" into today's midnight
+    return nil unless raw.match?(/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?\z/)
+
+    zone = ActiveSupport::TimeZone[params[:time_zone].to_s] || Time.zone
+    zone.parse(raw)
+  rescue ArgumentError
+    nil
+  end
+
+  def invalid_expiry_entered?
+    file_upload_params[:expires_after].present? && @file_upload.expires_after.nil?
   end
 
   # "%term%" with LIKE wildcards in the user's input escaped

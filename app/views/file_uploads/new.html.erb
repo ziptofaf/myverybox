@@ -1,8 +1,34 @@
 <h1>Upload a new file</h1>
 <div class="ui grid">
   <div class="twelve wide computer sixteen wide mobile column">
-    <%= form_for @file_upload, html: {class: 'ui form'} do |f| %>
-      <%= f.file_field :upload, class: 'ui input' %>
+    <%= form_for @file_upload, html: { class: "ui form#{' error' if @file_upload.errors.any?}" } do |f| %>
+      <% if @file_upload.errors.any? %>
+        <div class="ui error message">
+          <ul class="list">
+            <% @file_upload.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="field required<%= ' error' if @file_upload.errors[:upload].any? %>">
+        <%= f.label :upload, 'File' %>
+        <%= f.file_field :upload, class: 'ui input' %>
+      </div>
+
+      <div class="field<%= ' error' if @file_upload.errors[:expires_after].any? %>" data-controller="time-zone">
+        <%= f.label :expires_after, 'Expire after (optional)' %>
+        <%= f.datetime_local_field :expires_after,
+                                   value: params.dig(:file_upload, :expires_after),
+                                   min: Time.current.strftime('%Y-%m-%dT%H:%M') %>
+        <%= hidden_field_tag :time_zone, params[:time_zone], data: { time_zone_target: 'field' } %>
+        <small>
+          <span data-time-zone-target="label">Time is in UTC.</span>
+          Leave empty for the default: <%= default_expiry_description %>.
+        </small>
+      </div>
+
       <%= f.submit "Upload file", class: 'ui button primary' %>
     <% end %>
   </div>

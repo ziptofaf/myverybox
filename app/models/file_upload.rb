@@ -5,6 +5,8 @@ class FileUpload < ApplicationRecord
   has_one_attached :converted
   has_neighbors :embedding
   before_create :generate_url
+  validate :upload_must_be_attached
+  validate :expiry_must_be_in_the_future, on: :create
   after_create_commit :fill_metadata
 
   def generate_url
@@ -96,6 +98,14 @@ class FileUpload < ApplicationRecord
   end
 
   private
+
+  def upload_must_be_attached
+    errors.add(:upload, 'must be selected') unless upload.attached?
+  end
+
+  def expiry_must_be_in_the_future
+    errors.add(:expires_after, 'must be in the future') if expires_after.present? && expires_after <= Time.current
+  end
 
   # Runs the rule's converter on a local copy of the original; returns a Tempfile.
   def convert_with(rule)
