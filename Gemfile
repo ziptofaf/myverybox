@@ -81,3 +81,8 @@ gem "rdoc", "~> 7.0.4", require: false
 
 # pgvector support for Active Record (semantic search over image embeddings)
 gem "neighbor"
+
+# Database-backed Active Job backend (jobs survive restarts) + recurring tasks
+gem "solid_queue"
+# Web UI for Solid Queue (mounted at /jobs, signed-in users only)
+gem "mission_control-jobs"

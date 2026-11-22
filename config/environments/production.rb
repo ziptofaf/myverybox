@@ -72,7 +72,12 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
-  # config.active_job.queue_adapter = :resque
+  # Solid Queue: jobs are stored in the app's database, so they survive restarts
+  # and deploys; it also runs recurring tasks (config/recurring.yml). Its
+  # processes run inside Puma (see config/puma.rb, SOLID_QUEUE_IN_PUMA).
+  config.active_job.queue_adapter = :solid_queue
+  # keeps the last run of daily tasks visible (system settings page)
+  config.solid_queue.clear_finished_jobs_after = 2.days
   # config.active_job.queue_name_prefix = "myverybox_production"
 
   config.action_mailer.perform_caching = false

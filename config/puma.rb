@@ -33,3 +33,8 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
+
+# Run Solid Queue's supervisor (job workers, scheduler, recurring tasks) inside
+# Puma instead of a separate process/container. Enabled by default in the
+# Docker image; set SOLID_QUEUE_IN_PUMA=false to run `bin/jobs` separately.
+plugin :solid_queue if ENV.fetch("SOLID_QUEUE_IN_PUMA", "false") == "true"

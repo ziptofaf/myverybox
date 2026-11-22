@@ -25,5 +25,15 @@ module Myverybox
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.generators.test_framework = :rspec
+
+    # Mission Control (Solid Queue UI at /jobs): only for signed-in users. Its
+    # controllers inherit ApplicationController (Devise's authenticate_user!)
+    # and the route is wrapped in `authenticate :user`, so its own HTTP basic
+    # auth is not needed.
+    config.mission_control.jobs.base_controller_class = "ApplicationController"
+    config.mission_control.jobs.http_basic_auth_enabled = false
+    # always inspect Solid Queue (production's backend; its tables exist in every
+    # environment), not whatever adapter development/tests happen to use
+    config.mission_control.jobs.adapters = [:solid_queue]
   end
 end

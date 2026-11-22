@@ -7,6 +7,7 @@ class SystemSettingsController < ApplicationController
     @expires_in_seconds = Setting.find_by(name: 'expires_in_seconds')
     @remove_expired_files = Setting.find_by(name: 'remove_expired_files')
     @image_description_analysis = Setting.find_by(name: 'image_description_analysis')
+    @cleanup_schedule = RecurringTaskStatus.for('clean_up_expired_uploads')
   end
   
   def update_settings

@@ -20,6 +20,9 @@
           <%= link_to "File uploads", file_uploads_path, class: 'item' %>
           <%= link_to "API keys", api_keys_path, class: 'item' %>
           <%= link_to "System settings", system_settings_index_path, class: 'item' %>
+          <% if user_signed_in? && Rails.application.config.active_job.queue_adapter == :solid_queue %>
+            <%= link_to "Jobs", "/jobs", class: 'item' %>
+          <% end %>
         </div>
       </div>
       <br/>

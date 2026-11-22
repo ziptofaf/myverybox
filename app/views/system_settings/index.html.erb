@@ -54,8 +54,14 @@
           <%= f.number_field :expires_in_seconds, value: @expires_in_seconds.formatted_value %>
         </div>
        <div class="field">
-         <%= f.label :remove_expired_files, 'Should expired files be automatically removed (daily task, NOT YET implemented)' %>
+         <%= f.label :remove_expired_files, 'Automatically remove expired files (daily at 04:00 UTC)' %>
          <%= f.check_box :remove_expired_files, checked: @remove_expired_files.formatted_value %>
+         <% if @cleanup_schedule %>
+           <div class="ui grey text">
+             Last run: <%= @cleanup_schedule.last_run ? "#{time_ago_in_words(@cleanup_schedule.last_run)} ago" : 'not yet' %>
+             <% if @cleanup_schedule.next_run %> · next run: <%= @cleanup_schedule.next_run.utc.strftime('%Y-%m-%d %H:%M UTC') %><% end %>
+           </div>
+         <% end %>
        </div>
         <div class="field">
           <%= f.label :image_description_analysis, 'Should image files be sent to image analysis after upload - descriptions and search by image content (requires the clippy service)' %>

@@ -17,6 +17,11 @@ Rails.application.routes.draw do
   put 'system_settings/update_settings'
   delete 'system_settings/clean_up_expired_file_uploads'
   devise_for :users
+  # Background jobs UI (Solid Queue). Signed-out visitors are sent to sign in
+  # before the engine is reached.
+  authenticate :user do
+    mount MissionControl::Jobs::Engine, at: "/jobs"
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
